@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<body>
+	<div id="root">
+		<p>{{name.firstname}}</p>
+	</div>
+</body>
+</html>
+<script>
+	//使用 xxx.yyy.zzz 的形式可以访问对象
+	//用字符串路径访问对象的成员 <--解决方法
+	function getValueByPath(obj,path){
+		let res = obj;
+		let paths = path.split('.'); // 把  xxx.yyy.zzz => [xxx,yyy,zzz]
+		let prop
+		while(prop = paths.shift()){
+			res = res[prop]
+		}
+		return res;
+	}
+	console.log()
+	let name = {data:{
+			name:{
+				firstname:'张',
+				lastname:'sanfeng'
+			}
+		}}
+	let abc = getValueByPath(name,'data.name.firstname');
+	console.log(abc)
+</script>
