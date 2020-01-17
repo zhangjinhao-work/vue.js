@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>数据驱动-1</title>
+</head>
+<body>
+	<div id="root">
+		<div>
+			<div>
+				<div><p>{{name}} -{{message }}</p></div>
+			</div>
+		</div>
+	</div>
+	<script>
+		// 问题： 1、Vue使用的是虚拟DOM;
+		// 	  2、只考虑了单属性{{name}} ,而Vue中大量的使用层级 {{child.name.firstName}};
+		// 	  3、代码没有整合
+		
+		// 正则
+		let reg = /\{\{(.+?)\}\}/g;  
+
+		// 1拿到模板
+		let tmpNode = document.querySelector('#root');
+		// 2获取数据
+		let data = {
+			name:'张三',
+			message:'前端工程师'
+		};
+		// 3  数据插入
+		function compiler(template , data){
+			let childNodes = template.childNodes; // 取出子节点  回车符也默认为一个节点 返回的是undefined
+			for(let i=0;i<childNodes.length;i++){
+				let type = childNodes[i].nodeType; //  1 元素节点 ；3 文本节点
+				if(type === 3){   //判断是否有{{}}
+					let txt = childNodes[i].nodeValue; // 获取文本节点中的文本，仅对文本节点有效
+					txt = txt.replace(reg,function(_,g){
+						let key = g.trim() // 获取花括号里面的东西
+						let value = data[key];
+						
+						return value;
+					})
+
+					childNodes[i].nodeValue = txt; // 把
+
+				}else if(type === 1){
+					compiler(childNodes[i],data)
+				}
+
+			}
+		};
+
+		let generateNode = tmpNode.cloneNode(true); //仅对DOM元素生效，拷贝元素
+		console.log(tmpNode)
+		compiler(generateNode,data);
+		console.log(generateNode);
+		
+		root.parentNode.replaceChild(generateNode,root);
+	</script>
+</body>
+</html>

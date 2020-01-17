@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<body>
+	<div id="root">
+		<div>
+			<div>
+				<p>{{name}} -- {{message}}</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+<script>
+	let reg = /\{\{(.+?)\}\}/g;  
+	function compiler(template , data){
+		let childNodes = template.childNodes; // 取出子节点  回车符也默认为一个节点 返回的是undefined
+		for(let i=0;i<childNodes.length;i++){
+			let type = childNodes[i].nodeType; //  1 元素节点 ；3 文本节点
+			if(type === 3){   //判断是否有{{}}
+				let txt = childNodes[i].nodeValue; // 获取文本节点中的文本，仅对文本节点有效
+				txt = txt.replace(reg,function(_,g){
+					let key = g.trim() // 获取花括号里面的东西
+					let value = data[key];
+					
+					return value;
+				})
+
+				childNodes[i].nodeValue = txt; // 把
+
+			}else if(type === 1){
+				compiler(childNodes[i],data)
+			}
+
+		}
+	};
+	function MyVue(options){
+		// 内部的数据使用_开头  只读的数据用$开头
+		this._data = options.data;
+		this._el = options.el;
+		// 准备工作   在vue内部用this.$el来标识
+		this.$el = this._templateDOM = document.querySelector(this._el);
+		this._parent = this._templateDOM.parentNode;
+		//渲染工作
+		this.render()
+		
+	};
+	//将模板，即数据得到html 渲染到页面中
+	MyVue.prototype.render = function(){
+			this.compiler()
+		}
+	//编译，将模板与数据结合得到真正的DOM元素
+	MyVue.prototype.compiler = function(){
+		let realHTMLDOM = this._templateDOM.cloneNode(true); //使用模板拷贝一个  准DOM出来
+		compiler(realHTMLDOM,this._data);
+		this.update(realHTMLDOM)
+	}
+	//将DOM元素放到页面中
+	MyVue.prototype.update = function(real){
+		this._parent.replaceChild(real,document.querySelector('#root'))
+	}
+	let app = new MyVue({
+		el:'#root',
+		data:{
+			name:'张三',
+			message:'前端开发工程师'
+		}
+	});
+</script>
